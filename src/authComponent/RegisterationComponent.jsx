@@ -4,7 +4,6 @@ import loginImage from "../assets/login.png";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../security/AuthContext";
-import NavBar from "../components/NavBar";
 
 const RegisterationComponent = () => {
   const [username, setUsername] = useState("");

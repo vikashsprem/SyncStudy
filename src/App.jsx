@@ -7,7 +7,6 @@ import {
 } from "react-router-dom";
 import ShoppingCard from "./components/ShoppingCard";
 import BookList from "./components/BookList";
-import NavBar from "./components/NavBar";
 import UserAccount from "./components/UserAccount";
 import LoginComponent from "./authComponent/LoginComponent";
 import RegisterationComponent from "./authComponent/RegisterationComponent";
@@ -15,6 +14,9 @@ import Signup from "./authComponent/Signup";
 import AuthProvider, { useAuth } from "./security/AuthContext";
 import UploadBook from "./components/UploadBook";
 import "./App.css";
+import HomePage from "./components/HomePage";
+import Layout from "./components/Layout";
+import GroupChat from "./components/DiscussionRoom";
 
 function AuthenticatedRoute({ children }) {
   const authContext = useAuth();
@@ -26,7 +28,7 @@ const App = () => {
   return (
     <AuthProvider>
       <Router>
-        {true ? <NavBar /> : null}
+        <Layout>
         <Routes>
           <Route
             path="/book/upload"
@@ -36,9 +38,18 @@ const App = () => {
               </AuthenticatedRoute>
             }
           />
+          <Route
+            path="/home"
+            element={
+              <AuthenticatedRoute>
+                <HomePage />
+              </AuthenticatedRoute>
+            }
+          />
           <Route path="/users/signup" element={<Signup />} />
           <Route path="/auth/login" element={<LoginComponent />} />
           <Route path="/users/create" element={<RegisterationComponent />} />
+          <Route path="/chat" element={<GroupChat />} />
           <Route
             path="/"
             element={
@@ -72,6 +83,7 @@ const App = () => {
             }
           />
         </Routes>
+        </Layout>
       </Router>
     </AuthProvider>
   );

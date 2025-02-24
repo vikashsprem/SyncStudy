@@ -3,6 +3,7 @@ import "./auth.css";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../security/AuthContext";
+import CircularProgress from "@mui/material/CircularProgress";
 
 const LoginComponent = () => {
   const [username, setUsername] = useState("");
@@ -10,6 +11,7 @@ const LoginComponent = () => {
   // const [error, setError] = useState(false);
   // const [logout, setLogout] = useState(false);
   const [hasLoginFailed, setHasLoginFailed] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
   const auth = useAuth();
@@ -17,10 +19,13 @@ const LoginComponent = () => {
   async function handleSubmit(event) {
     console.log(event);
     event.preventDefault();
+    setLoading(true);
     if (await auth.handleLogin(username, password)) {
+      setLoading(false);
       navigate("/books");
     } else {
       setHasLoginFailed(true);
+      setLoading(false);
     }
   }
 
@@ -83,7 +88,14 @@ const LoginComponent = () => {
             className=" text-black p-2 w-4/5 font-semibold text-sm rounded-sm"
             id="continue-button"
           >
-            Log In
+            {loading ? (
+              <div className="flex justify-center align-middle gap-3">
+                <CircularProgress size={20} color="white" />{" "}
+                <span>Logging you in</span>
+              </div>
+            ) : (
+              "Continue"
+            )}
           </button>
         </div>
 

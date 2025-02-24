@@ -1,0 +1,85 @@
+.app {
+    font-family: Arial, sans-serif;
+    color: #333;
+  }
+  
+  .content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .user-profile {
+    display: flex;
+    align-items: center;
+    padding: 20px;
+  }
+  
+  .profile-pic {
+    border-radius: 50%;
+    width: 80px;
+    height: 80px;
+    margin-right: 15px;
+  }
+  
+  .profile-info h2 {
+    margin: 0;
+  }
+  
+  .dashboard-btn {
+    padding: 10px 20px;
+    margin-top: 10px;
+    background-color: #ff7b00;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .service-section {
+    text-align: center;
+    padding: 20px;
+  }
+  
+  .services-list {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .join-ride-btn {
+    padding: 10px 20px;
+    background-color: #ff7b00;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .card-section {
+    display: flex;
+    gap: 20px;
+    padding: 20px;
+  }
+  
+  .card {
+    background-color: #e5e5e5;
+    padding: 20px;
+    border-radius: 10px;
+    width: 150px;
+    text-align: center;
+  }
+  
+  .card h4 {
+    margin: 0;
+  }
+  
+  .card-action-btn {
+    padding: 10px;
+    background-color: #ff7b00;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+    

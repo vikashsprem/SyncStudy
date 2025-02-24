@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import "./auth.css";
-import NavBar from "../components/NavBar";
 import { useNavigate } from "react-router-dom";
 
 const OtpAuth = () => {

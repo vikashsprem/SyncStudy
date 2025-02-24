@@ -6,7 +6,7 @@ import "./component.css";
 
 const BookInput = () => {
   const navigate = useNavigate();
-  const APP_KEY = "your_app_key_here";
+  const APP_KEY = "px6ca2gxjrgjq96";
 
   const [book, setBook] = useState({
     imageLink: "",
@@ -40,7 +40,7 @@ const BookInput = () => {
 
   return (
     <div className="upload-box">
-      <div className="bg-gray-400 p-5 rounded-md fixed overflow-hidden top-5 right-5">
+      <div className="bg-gray-400 p-5 rounded-md fixed overflow-hidden bottom-5 right-5">
         {Object.entries(book).map(
           ([key, value]) =>
             value &&
@@ -65,7 +65,7 @@ const BookInput = () => {
         )}
       </div>
 
-      <div className="container mx-auto overflow-y-scroll w-1/2">
+      <div className="container mx-auto max-w-4xl">
         <div className="bg-slate-500 p-8 border rounded shadow-lg">
           <h1 className="text-3xl text-black text-center font-bold">
             Book Details
@@ -149,7 +149,7 @@ const BookInput = () => {
               htmlFor="price"
               className="block text-sm font-medium text-gray-300"
             >
-              Price
+              Price (₹)
             </label>
             <input
               type="number"

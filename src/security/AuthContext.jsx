@@ -11,7 +11,7 @@ export const useAuth = () => useContext(AuthContext)
 export default function AuthProvider({ children }) {
 
     //3: Put some state in the context
-    const [isAuthenticated, setAuthenticated] = useState(false)
+    const [isAuthenticated, setAuthenticated] = useState(true)
 
     const [username, setUsername] = useState(null)
 
@@ -31,10 +31,11 @@ export default function AuthProvider({ children }) {
                 setAuthenticated(true)
                 setUsername(username)
                 setToken(jwtToken)
+                localStorage.setItem("token",jwtToken);
 
                 apiClient.interceptors.request.use(
                     (config) => {
-                        config.headers.Authorization = jwtToken
+                        config.headers.Authorization = jwtToken || localStorage.getItem("token");
                         return config
                     }
                 )

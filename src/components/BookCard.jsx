@@ -5,7 +5,7 @@ function BookCard(props) {
   const { title, imageLink, rating, price, discount } = props.book || {};
 
   return (
-    <div className="bg-gray-200 w-52">
+    <div className="bg-gray-200 max-w-52 flex-1">
       <a href="#">
         <img
           className="rounded-t-lg"
