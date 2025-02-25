@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { addBook } from "../apiConfig/ApiService";
 import DropboxChooser from "react-dropbox-chooser";
-import "./component.css";
 
 const BookInput = () => {
   const navigate = useNavigate();
@@ -27,7 +26,7 @@ const BookInput = () => {
 
   function handleSuccess(files) {
     const tempUrl = files[0].link.replace("dl=0", "dl=1");
-    book.bookLink = tempUrl;
+    setBook(prev => ({ ...prev, bookLink: tempUrl }));
   }
 
   const handleSubmit = async (e) => {
@@ -39,202 +38,176 @@ const BookInput = () => {
   };
 
   return (
-    <div className="upload-box">
-      <div className="bg-gray-400 p-5 rounded-md fixed overflow-hidden bottom-5 right-5">
-        {Object.entries(book).map(
-          ([key, value]) =>
-            value &&
-            (key !== "imageLink" ? (
-              <div
-                key={key}
-                className="flex mb-1 gap-3 mx-auto bg-slate-300 px-1"
-              >
-                <span className="text-black capitalize text-xs">{key}:</span>
-                <span className="text-black text-xs">
-                  {value.slice(0, 20) || "N/A"}
-                </span>
-              </div>
-            ) : (
-              <img
-                src={book.imageLink}
-                alt="Book Cover"
-                className="align-middle mb-1 mx-auto"
-                width={140}
-              />
-            ))
+    <div className="min-h-screen p-6">
+      {/* Preview Panel */}
+      <div className="fixed bottom-5 right-5 bg-[#2a2e32] p-4 rounded-lg shadow-lg max-w-xs">
+        <h3 className="text-white text-sm font-semibold mb-3">Preview</h3>
+        {book.imageLink && (
+          <img
+            src={book.imageLink}
+            alt="Book Cover"
+            className="w-32 h-40 object-cover rounded-md mx-auto mb-3"
+          />
+        )}
+        {Object.entries(book).map(([key, value]) =>
+          value && key !== "imageLink" ? (
+            <div key={key} className="bg-[#373b40] rounded-md p-2 mb-2">
+              <span className="text-gray-400 capitalize text-xs">{key}: </span>
+              <span className="text-white text-xs">{value.slice(0, 20)}</span>
+            </div>
+          ) : null
         )}
       </div>
 
-      <div className="container mx-auto max-w-4xl">
-        <div className="bg-slate-500 p-8 border rounded shadow-lg">
-          <h1 className="text-3xl text-black text-center font-bold">
-            Book Details
-          </h1>
-        </div>
+      {/* Main Form */}
+      <div className="max-w-6xl mx-auto">
+        <h1 className="text-3xl font-bold text-white mb-8">Book Details</h1>
+        
+        <form onSubmit={handleSubmit} className="bg-[#2a2e32] rounded-lg shadow-lg p-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Title */}
+            <div className="col-span-1">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Title
+              </label>
+              <input
+                type="text"
+                className="w-full bg-[#373b40] text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                name="title"
+                value={book.title}
+                onChange={handleChange}
+              />
+            </div>
 
-        <form
-          onSubmit={handleSubmit}
-          className="p-8 border rounded shadow-lg"
-          style={{ backgroundColor: "rgb(18, 18, 18)" }}
-        >
-          <div className="mb-4">
-            <label
-              htmlFor="title"
-              className="block text-sm font-medium text-gray-300"
-            >
-              Title
-            </label>
-            <input
-              type="text"
-              className="input-field mt-1 px-4 py-2 p-2 border rounded w-full"
-              id="title"
-              name="title"
-              value={book.title}
-              onChange={handleChange}
-            />
+            {/* Author */}
+            <div className="col-span-1">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Author
+              </label>
+              <input
+                type="text"
+                className="w-full bg-[#373b40] text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                name="author"
+                value={book.author}
+                onChange={handleChange}
+              />
+            </div>
+
+            {/* Genre */}
+            <div className="col-span-1">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Genre
+              </label>
+              <input
+                type="text"
+                className="w-full bg-[#373b40] text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                name="genre"
+                value={book.genre}
+                onChange={handleChange}
+              />
+            </div>
+
+            {/* Publication Year */}
+            <div className="col-span-1">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Publication Year
+              </label>
+              <input
+                type="number"
+                className="w-full bg-[#373b40] text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                name="publicationYear"
+                value={book.publicationYear}
+                onChange={handleChange}
+              />
+            </div>
+
+            {/* Price */}
+            <div className="col-span-1">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Price (₹)
+              </label>
+              <input
+                type="number"
+                className="w-full bg-[#373b40] text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                name="price"
+                value={book.price}
+                onChange={handleChange}
+              />
+            </div>
+
+            {/* Language */}
+            <div className="col-span-1">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Language
+              </label>
+              <input
+                type="text"
+                className="w-full bg-[#373b40] text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                name="language"
+                value={book.language}
+                onChange={handleChange}
+              />
+            </div>
+
+            {/* Image Link - Full Width */}
+            <div className="col-span-full">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Image Link
+              </label>
+              <input
+                type="text"
+                className="w-full bg-[#373b40] text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                name="imageLink"
+                value={book.imageLink}
+                onChange={handleChange}
+              />
+            </div>
+
+            {/* Description - Full Width */}
+            <div className="col-span-full">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Description
+              </label>
+              <textarea
+                className="w-full bg-[#373b40] text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px]"
+                name="description"
+                value={book.description}
+                onChange={handleChange}
+              />
+            </div>
+
+            {/* Dropbox Chooser - Full Width */}
+            <div className="col-span-full">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Attach Book
+              </label>
+              <DropboxChooser
+                appKey={APP_KEY}
+                success={handleSuccess}
+                cancel={() => {}}
+              >
+                <div className="w-full bg-[#373b40] hover:bg-[#424242] text-white rounded-lg px-4 py-3 cursor-pointer text-center transition-colors duration-200">
+                  CLICK TO ATTACH BOOK FILE
+                </div>
+              </DropboxChooser>
+            </div>
           </div>
 
-          <div className="mb-4">
-            <label
-              htmlFor="author"
-              className="block text-sm font-medium text-gray-300"
+          {/* Submit Button - Full Width */}
+          <div className="mt-8 flex gap-5">
+            <button
+              type="submit"
+              className="w-full bg-[#101827] hover:bg-sky-950 text-white py-3 rounded-lg transition-colors duration-200 font-medium"
             >
-              Author
-            </label>
-            <input
-              type="text"
-              className="input-field mt-1 px-4 py-2 p-2 border rounded w-full"
-              id="author"
-              name="author"
-              value={book.author}
-              onChange={handleChange}
-            />
+              Clear
+            </button>
+            <button
+              type="submit"
+              className="w-full bg-[#101827] hover:bg-sky-950 text-white py-3 rounded-lg transition-colors duration-200 font-medium"
+            >
+              Submit Book Details
+            </button>
           </div>
-          <div className="mb-4">
-            <label
-              htmlFor="genre"
-              className="block text-sm font-medium text-gray-300"
-            >
-              Genre
-            </label>
-            <input
-              type="text"
-              className="input-field mt-1 px-4 py-2 p-2 border rounded w-full"
-              id="genre"
-              name="genre"
-              value={book.genre}
-              onChange={handleChange}
-            />
-          </div>
-
-          <div className="mb-4">
-            <label
-              htmlFor="publicationYear"
-              className="block text-sm font-medium text-gray-300"
-            >
-              Publication Year
-            </label>
-            <input
-              type="number"
-              className="input-field mt-1 px-4 py-2 p-2 border rounded w-full"
-              id="publicationYear"
-              name="publicationYear"
-              value={book.publicationYear}
-              onChange={handleChange}
-            />
-          </div>
-
-          <div className="mb-4">
-            <label
-              htmlFor="price"
-              className="block text-sm font-medium text-gray-300"
-            >
-              Price (₹)
-            </label>
-            <input
-              type="number"
-              className="input-field mt-1 px-4 py-2 p-2 border rounded w-full"
-              id="price"
-              name="price"
-              value={book.price}
-              onChange={handleChange}
-            />
-          </div>
-
-          <div className="mb-4">
-            <label
-              htmlFor="language"
-              className="block text-sm font-medium text-gray-300"
-            >
-              Language
-            </label>
-            <input
-              type="text"
-              className="input-field mt-1 px-4 py-2 p-2 border rounded w-full"
-              id="language"
-              name="language"
-              value={book.language}
-              onChange={handleChange}
-            />
-          </div>
-
-          <div className="mb-4">
-            <label
-              htmlFor="description"
-              className="block text-sm font-medium text-gray-300"
-            >
-              Description
-            </label>
-            <textarea
-              className="input-field mt-1 px-4 py-2 p-2 border rounded w-full"
-              id="description"
-              name="description"
-              value={book.description}
-              onChange={handleChange}
-            />
-          </div>
-
-          <div className="mb-4">
-            <label
-              htmlFor="imageLink"
-              className="block text-sm font-medium text-gray-300"
-            >
-              Image Link
-            </label>
-            <input
-              type="text"
-              className="input-field mt-1 px-4 py-2 p-2 border rounded w-full"
-              id="imageLink"
-              name="imageLink"
-              value={book.imageLink}
-              onChange={handleChange}
-            />
-          </div>
-
-          <div className="mb-4">
-            <label
-              htmlFor="imageLink"
-              className="block text-sm font-medium text-gray-300"
-            >
-              Attach Book
-            </label>
-            <DropboxChooser
-              appKey={APP_KEY}
-              success={handleSuccess}
-              cancel={() => this.onCancel()}
-            >
-              <div className="dropbox-button input-field mt-1 px-4 py-2 p-2 border rounded w-full font-semibold bg-green-950 cursor-pointer">
-                CLICK TO ATTACH BOOK FILE
-              </div>
-            </DropboxChooser>
-          </div>
-
-          <button
-            type="submit"
-            className="bg-blue-800 hover:bg-slate-900 text-white p-2 rounded mt-1 border w-full"
-          >
-            Submit
-          </button>
         </form>
       </div>
     </div>

@@ -11,7 +11,8 @@ export const useAuth = () => useContext(AuthContext)
 export default function AuthProvider({ children }) {
 
     //3: Put some state in the context
-    const [isAuthenticated, setAuthenticated] = useState(true)
+    const jwt = localStorage.getItem("token");
+    const [isAuthenticated, setAuthenticated] = useState(jwt ? true : false)
 
     const [username, setUsername] = useState(null)
 
@@ -27,7 +28,7 @@ export default function AuthProvider({ children }) {
             if (response.status == 200) {
 
                 const jwtToken = 'Bearer ' + response.data.token
-
+                localStorage.setItem("token", jwtToken);
                 setAuthenticated(true)
                 setUsername(username)
                 setToken(jwtToken)
@@ -54,6 +55,7 @@ export default function AuthProvider({ children }) {
 
     function handleLogout() {
         setAuthenticated(false)
+        localStorage.removeItem("token")
         setToken(null)
         setUsername(null)
     }

@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import logo from "../assets/booklogo.png";
 import Profile from "./AccountSection";
-import SearchBar from "./SearchBar";
 import Mode from "./Mode";
 import { Link } from "react-router-dom";
 import "./component.css";
@@ -10,14 +9,14 @@ import GridViewIcon from "@mui/icons-material/GridView";
 
 function NavBar() {
   const { isAuthenticated } = useAuth();
-  const [mode, setMode] = useState(false);
-  console.log(mode);
+  const mode = localStorage.getItem("mode");
+
   return (
     <>
       <nav className="bg-white border-gray-200 dark:bg-gray-900 shadow-sm shadow-slate-500 p-2">
         <div className="flex flex-col sm:flex-row justify-between">
           <div className="flex justify-between px-5 items-center flex-1">
-            {!mode ? (
+            {mode==="study" ? (
               <Link
                 href="#"
                 className="flex items-center space-x-3 rtl:space-x-reverse"
@@ -46,7 +45,7 @@ function NavBar() {
           <div className="border-b-[0.1px] border-white w-full my-2 sm:hidden"></div>
 
           <div className="flex items-center space-x-5  md:order-2 justify-center">
-            <Mode setMode={setMode} />
+            <Mode />
           </div>
         </div>
       </nav>

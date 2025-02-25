@@ -17,11 +17,12 @@ import "./App.css";
 import HomePage from "./components/HomePage";
 import Layout from "./components/Layout";
 import GroupChat from "./components/DiscussionRoom";
+import MarketplaceComponent from "./components/MarketplaceComponent";
 
 function AuthenticatedRoute({ children }) {
   const authContext = useAuth();
   if (authContext.isAuthenticated) return children;
-  return <Navigate to="/auth/login" />;
+  return <Navigate to='/auth/login' />;
 }
 
 const App = () => {
@@ -29,60 +30,76 @@ const App = () => {
     <AuthProvider>
       <Router>
         <Layout>
-        <Routes>
-          <Route
-            path="/book/upload"
-            element={
-              <AuthenticatedRoute>
-                <UploadBook />
-              </AuthenticatedRoute>
-            }
-          />
-          <Route
-            path="/home"
-            element={
-              <AuthenticatedRoute>
-                <HomePage />
-              </AuthenticatedRoute>
-            }
-          />
-          <Route path="/users/signup" element={<Signup />} />
-          <Route path="/auth/login" element={<LoginComponent />} />
-          <Route path="/users/create" element={<RegisterationComponent />} />
-          <Route path="/chat" element={<GroupChat />} />
-          <Route
-            path="/"
-            element={
-              <AuthenticatedRoute>
-                <BookList />
-              </AuthenticatedRoute>
-            }
-          />
-          <Route
-            path="/user"
-            element={
-              <AuthenticatedRoute>
-                <UserAccount />
-              </AuthenticatedRoute>
-            }
-          />
-          <Route
-            path="/books"
-            element={
-              <AuthenticatedRoute>
-                <BookList />
-              </AuthenticatedRoute>
-            }
-          />
-          <Route
-            path="/books/:id"
-            element={
-              <AuthenticatedRoute>
-                <ShoppingCard />
-              </AuthenticatedRoute>
-            }
-          />
-        </Routes>
+          <Routes>
+            <Route
+              path='/book/upload'
+              element={
+                <AuthenticatedRoute>
+                  <UploadBook />
+                </AuthenticatedRoute>
+              }
+            />
+            <Route
+              path='/home'
+              element={
+                <AuthenticatedRoute>
+                  <HomePage />
+                </AuthenticatedRoute>
+              }
+            />
+            <Route path='/users/signup' element={<Signup />} />
+            <Route path='/auth/login' element={<LoginComponent />} />
+            <Route path='/users/create' element={<RegisterationComponent />} />
+            <Route
+              path='/chat'
+              element={
+                <AuthenticatedRoute>
+                  <GroupChat />
+                </AuthenticatedRoute>
+              }
+            />
+            <Route
+              path='/market-place'
+              element={
+                <AuthenticatedRoute>
+                  <MarketplaceComponent />
+                </AuthenticatedRoute>
+              }
+            />
+
+            <Route
+              path='/'
+              element={
+                <AuthenticatedRoute>
+                  <BookList />
+                </AuthenticatedRoute>
+              }
+            />
+            <Route
+              path='/user'
+              element={
+                <AuthenticatedRoute>
+                  <UserAccount />
+                </AuthenticatedRoute>
+              }
+            />
+            <Route
+              path='/books'
+              element={
+                <AuthenticatedRoute>
+                  <BookList />
+                </AuthenticatedRoute>
+              }
+            />
+            <Route
+              path='/books/:id'
+              element={
+                <AuthenticatedRoute>
+                  <ShoppingCard />
+                </AuthenticatedRoute>
+              }
+            />
+          </Routes>
         </Layout>
       </Router>
     </AuthProvider>
