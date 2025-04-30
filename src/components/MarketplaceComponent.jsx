@@ -1,17 +1,18 @@
 import React, { useState } from 'react';
 import calc from "../assets/calc.jpg"
+import note from "../assets/sticky-notes.jpg"
 
 const MarketplaceComponent = () => {
   const [items, setItems] = useState([
     {
       id: 1,
-      title: "Engineering Textbook",
+      title: "Sticky Notes",
       price: 45.99,
       category: "Books",
       condition: "Like New",
       seller: "John D.",
       description: "Fundamentals of Engineering, 5th Edition. Used for one semester.",
-      image: calc
+      image: note
     },
     {
       id: 2,

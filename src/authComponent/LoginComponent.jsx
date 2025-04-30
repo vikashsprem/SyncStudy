@@ -4,12 +4,11 @@ import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../security/AuthContext";
 import CircularProgress from "@mui/material/CircularProgress";
+import { executeJwtAuthenticationService } from "../apiConfig/ApiService";
 
 const LoginComponent = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  // const [error, setError] = useState(false);
-  // const [logout, setLogout] = useState(false);
   const [hasLoginFailed, setHasLoginFailed] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -17,13 +16,23 @@ const LoginComponent = () => {
   const auth = useAuth();
 
   async function handleSubmit(event) {
-    console.log(event);
     event.preventDefault();
     setLoading(true);
-    if (await auth.handleLogin(username, password)) {
-      setLoading(false);
-      navigate("/books");
-    } else {
+    try {
+      const response = await executeJwtAuthenticationService(username, password);
+      if (response.status === 200) {
+        const { token, userId } = response.data;
+        await auth.handleLogin(token, username, userId);
+        setLoading(false);
+        const mode = localStorage.getItem("mode");
+        if(mode === "study") navigate("/books");
+        else navigate("/home");
+      } else {
+        setHasLoginFailed(true);
+        setLoading(false);
+      }
+    } catch (error) {
+      console.error('Login error:', error);
       setHasLoginFailed(true);
       setLoading(false);
     }
@@ -44,10 +53,10 @@ const LoginComponent = () => {
   };
 
   return (
-    <div className="flex justify-center h-screen mt-5">
+    <div className="max-w-xl mx-auto h-screen mt-10">
       <form
         onSubmit={handleSubmit}
-        className="space-y-6 w-2/5-md m-2 p-3 rounded-md"
+        className="space-y-6 m-2 p-3 rounded-md h-full"
         id="form"
       >
         <div className="text-center">
@@ -113,29 +122,29 @@ const LoginComponent = () => {
         </div>
 
         <div>
-          <div className="m-2 flex justify-center">
-            <a
+          <div className="m-3 flex justify-center">
+            <span
               href=""
-              className="border-gray border font-bold  text-white p-2 w-4/5 text-center rounded-3xl text-sm"
+              className="border-gray-400 border font-bold  text-gray-400 p-2 w-4/5 text-center rounded-3xl text-sm"
             >
               Continue with Google
-            </a>
+            </span>
           </div>
           <div className="m-2 flex justify-center">
-            <a
+            <span
               href=""
-              className="border-gray border font-bold text-white p-2 w-4/5 text-center rounded-3xl text-sm"
+              className="border-gray-400 border font-bold  text-gray-400 p-2 w-4/5 text-center rounded-3xl text-sm"
             >
               Continue with Facebook
-            </a>
+            </span>
           </div>
           <div className="m-2 flex justify-center">
-            <a
+            <span
               href=""
-              className="border-gray border font-bold  text-white p-2 w-4/5 text-center rounded-3xl text-sm"
+              className="border-gray-400 border font-bold  text-gray-400 p-2 w-4/5 text-center rounded-3xl text-sm"
             >
               Continue with phone number
-            </a>
+            </span>
           </div>
         </div>
 

@@ -10,18 +10,25 @@ import BookList from "./components/BookList";
 import UserAccount from "./components/UserAccount";
 import LoginComponent from "./authComponent/LoginComponent";
 import RegisterationComponent from "./authComponent/RegisterationComponent";
-import Signup from "./authComponent/Signup";
 import AuthProvider, { useAuth } from "./security/AuthContext";
 import UploadBook from "./components/UploadBook";
 import "./App.css";
 import HomePage from "./components/HomePage";
 import Layout from "./components/Layout";
 import GroupChat from "./components/DiscussionRoom";
-import MarketplaceComponent from "./components/MarketplaceComponent";
+import Marketplace from "./components/Marketplace";
+import MarketplaceItemDetail from "./components/MarketplaceItemDetail";
+import OrganizationManagement from "./components/OrganizationManagement";
 
 function AuthenticatedRoute({ children }) {
   const authContext = useAuth();
   if (authContext.isAuthenticated) return children;
+  return <Navigate to='/auth/login' />;
+}
+
+function AdminRoute({ children }) {
+  const authContext = useAuth();
+  if (authContext.isAuthenticated && authContext.isAdmin) return children;
   return <Navigate to='/auth/login' />;
 }
 
@@ -31,6 +38,14 @@ const App = () => {
       <Router>
         <Layout>
           <Routes>
+            <Route
+              path='/admin/organizations'
+              element={
+                <AdminRoute>
+                  <OrganizationManagement />
+                </AdminRoute>
+              }
+            />
             <Route
               path='/book/upload'
               element={
@@ -47,9 +62,8 @@ const App = () => {
                 </AuthenticatedRoute>
               }
             />
-            <Route path='/users/signup' element={<Signup />} />
+            <Route path='/register' element={<RegisterationComponent />} />
             <Route path='/auth/login' element={<LoginComponent />} />
-            <Route path='/users/create' element={<RegisterationComponent />} />
             <Route
               path='/chat'
               element={
@@ -62,7 +76,15 @@ const App = () => {
               path='/market-place'
               element={
                 <AuthenticatedRoute>
-                  <MarketplaceComponent />
+                  <Marketplace />
+                </AuthenticatedRoute>
+              }
+            />
+            <Route
+              path='/market-place/:itemId'
+              element={
+                <AuthenticatedRoute>
+                  <MarketplaceItemDetail />
                 </AuthenticatedRoute>
               }
             />

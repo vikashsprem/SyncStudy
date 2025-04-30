@@ -5,7 +5,7 @@ function BookCard(props) {
   const { title, imageLink, rating, price, discount } = props.book || {};
 
   return (
-    <div className="bg-white shadow-lg rounded-lg overflow-hidden flex flex-col transition-transform transform hover:scale-105 w-64">
+    <div className="bg-gray-400 shadow-lg rounded-lg overflow-hidden flex flex-col transition-transform transform hover:scale-105 w-64">
       {/* Image Container with Fixed Height and Width */}
       <div className="w-full h-64 overflow-hidden">
         <a href="#" className="block">

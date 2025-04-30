@@ -5,14 +5,13 @@ import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Button from "@mui/material/Button";
 import { useAuth } from "../security/AuthContext";
 
-export default function ColorToggleButton() {
+export default function ColorToggleButton({ mode , setMode }) {
   const navigate = useNavigate();
   const auth = useAuth();
-  const [mode, setLocalMode] = React.useState(localStorage.getItem("mode") || "study");
 
   const handleChange = () => {
     const newMode = mode === "share" ? "study" : "share";
-    setLocalMode(newMode);
+    setMode(newMode);
     localStorage.setItem("mode", newMode);
 
     if (newMode === "study") {
@@ -24,9 +23,14 @@ export default function ColorToggleButton() {
 
   if (!auth.isAuthenticated) {
     return (
-      <Button variant="contained" color="primary" onClick={() => navigate("/auth/login")}>
-        Login
-      </Button>
+      <div className="flex mx-5 gap-2">
+        <Button color="primary" sx={{border:'1px solid #30373e', px:3}} onClick={() => navigate("/auth/login")}>
+          Log In
+        </Button>
+        <Button color="primary" sx={{border:'1px solid #30373e', px:3}} onClick={() => navigate("/users/register")}>
+          Sign up
+        </Button>
+      </div>
     );
   }
 

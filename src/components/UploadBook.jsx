@@ -1,14 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { addBook } from "../apiConfig/ApiService";
-import DropboxChooser from "react-dropbox-chooser";
 
 const BookInput = () => {
   const navigate = useNavigate();
-  const APP_KEY = "px6ca2gxjrgjq96";
 
   const [book, setBook] = useState({
-    imageLink: "",
     title: "",
     author: "",
     genre: "",
@@ -16,24 +13,68 @@ const BookInput = () => {
     price: "",
     language: "",
     description: "",
-    bookLink: "",
   });
+
+  const [bookFile, setBookFile] = useState(null);
+  const [coverImage, setCoverImage] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [error, setError] = useState("");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setBook((prevBook) => ({ ...prevBook, [name]: value }));
   };
 
-  function handleSuccess(files) {
-    const tempUrl = files[0].link.replace("dl=0", "dl=1");
-    setBook(prev => ({ ...prev, bookLink: tempUrl }));
+  const handleBookFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file && file.type === "application/pdf") {
+      setBookFile(file);
+      setError("");
+    } else {
+      setError("Please upload a PDF file");
+      setBookFile(null);
+    }
+  };
+
+  const handleCoverImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file && file.type.startsWith("image/")) {
+      setCoverImage(file);
+      setPreviewUrl(URL.createObjectURL(file));
+      setError("");
+    } else {
+      setError("Please upload an image file");
+      setCoverImage(null);
+      setPreviewUrl(null);
   }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const response = await addBook(book);
+    
+    if (!bookFile || !coverImage) {
+      setError("Please upload both book file and cover image");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", bookFile);
+    formData.append("coverImage", coverImage);
+    formData.append("title", book.title);
+    formData.append("author", book.author);
+    formData.append("genre", book.genre);
+    formData.append("publicationYear", book.publicationYear);
+    formData.append("price", book.price);
+    formData.append("language", book.language);
+    formData.append("description", book.description);
+
+    try {
+      const response = await addBook(formData);
     if (response.status === 200) {
       navigate("/books");
+      }
+    } catch (error) {
+      setError(error.response?.data || "Error uploading book");
     }
   };
 
@@ -42,18 +83,18 @@ const BookInput = () => {
       {/* Preview Panel */}
       <div className="fixed bottom-5 right-5 bg-[#2a2e32] p-4 rounded-lg shadow-lg max-w-xs">
         <h3 className="text-white text-sm font-semibold mb-3">Preview</h3>
-        {book.imageLink && (
+        {previewUrl && (
           <img
-            src={book.imageLink}
-            alt="Book Cover"
+            src={previewUrl}
+            alt="Book Cover Preview"
             className="w-32 h-40 object-cover rounded-md mx-auto mb-3"
           />
         )}
         {Object.entries(book).map(([key, value]) =>
-          value && key !== "imageLink" ? (
+          value ? (
             <div key={key} className="bg-[#373b40] rounded-md p-2 mb-2">
               <span className="text-gray-400 capitalize text-xs">{key}: </span>
-              <span className="text-white text-xs">{value.slice(0, 20)}</span>
+              <span className="text-white text-xs">{value.toString().slice(0, 20)}</span>
             </div>
           ) : null
         )}
@@ -64,7 +105,38 @@ const BookInput = () => {
         <h1 className="text-3xl font-bold text-white mb-8">Book Details</h1>
         
         <form onSubmit={handleSubmit} className="bg-[#2a2e32] rounded-lg shadow-lg p-8">
+          {error && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
+              {error}
+            </div>
+          )}
+          
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* File Uploads */}
+            <div className="col-span-full">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Upload Book (PDF)
+              </label>
+              <input
+                type="file"
+                accept="application/pdf"
+                onChange={handleBookFileChange}
+                className="w-full bg-[#373b40] text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div className="col-span-full">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Upload Cover Image
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleCoverImageChange}
+                className="w-full bg-[#373b40] text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
             {/* Title */}
             <div className="col-span-1">
               <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -76,6 +148,7 @@ const BookInput = () => {
                 name="title"
                 value={book.title}
                 onChange={handleChange}
+                required
               />
             </div>
 
@@ -90,6 +163,7 @@ const BookInput = () => {
                 name="author"
                 value={book.author}
                 onChange={handleChange}
+                required
               />
             </div>
 
@@ -104,6 +178,7 @@ const BookInput = () => {
                 name="genre"
                 value={book.genre}
                 onChange={handleChange}
+                required
               />
             </div>
 
@@ -118,6 +193,7 @@ const BookInput = () => {
                 name="publicationYear"
                 value={book.publicationYear}
                 onChange={handleChange}
+                required
               />
             </div>
 
@@ -132,6 +208,7 @@ const BookInput = () => {
                 name="price"
                 value={book.price}
                 onChange={handleChange}
+                required
               />
             </div>
 
@@ -146,24 +223,11 @@ const BookInput = () => {
                 name="language"
                 value={book.language}
                 onChange={handleChange}
+                required
               />
             </div>
 
-            {/* Image Link - Full Width */}
-            <div className="col-span-full">
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Image Link
-              </label>
-              <input
-                type="text"
-                className="w-full bg-[#373b40] text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                name="imageLink"
-                value={book.imageLink}
-                onChange={handleChange}
-              />
-            </div>
-
-            {/* Description - Full Width */}
+            {/* Description */}
             <div className="col-span-full">
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Description
@@ -173,30 +237,30 @@ const BookInput = () => {
                 name="description"
                 value={book.description}
                 onChange={handleChange}
+                required
               />
-            </div>
-
-            {/* Dropbox Chooser - Full Width */}
-            <div className="col-span-full">
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Attach Book
-              </label>
-              <DropboxChooser
-                appKey={APP_KEY}
-                success={handleSuccess}
-                cancel={() => {}}
-              >
-                <div className="w-full bg-[#373b40] hover:bg-[#424242] text-white rounded-lg px-4 py-3 cursor-pointer text-center transition-colors duration-200">
-                  CLICK TO ATTACH BOOK FILE
-                </div>
-              </DropboxChooser>
             </div>
           </div>
 
-          {/* Submit Button - Full Width */}
+          {/* Submit Button */}
           <div className="mt-8 flex gap-5">
             <button
-              type="submit"
+              type="button"
+              onClick={() => {
+                setBook({
+                  title: "",
+                  author: "",
+                  genre: "",
+                  publicationYear: "",
+                  price: "",
+                  language: "",
+                  description: "",
+                });
+                setBookFile(null);
+                setCoverImage(null);
+                setPreviewUrl(null);
+                setError("");
+              }}
               className="w-full bg-[#101827] hover:bg-sky-950 text-white py-3 rounded-lg transition-colors duration-200 font-medium"
             >
               Clear

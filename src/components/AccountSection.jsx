@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { useAuth } from "../security/AuthContext";
+import { useNavigate } from "react-router-dom";
 import Avatar from "@mui/material/Avatar";
 import ProfileImage from "../assets/dummy-profile.png";
 
 const Profile = () => {
-  const { handleLogout } = useAuth();
+  const { handleLogout, isAdmin } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const navigate = useNavigate();
 
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
@@ -27,6 +29,14 @@ const Profile = () => {
         <ul>
           <li className="py-2 px-4 hover:bg-slate-500 cursor-pointer">Profile</li>
           <li className="py-2 px-4 hover:bg-slate-500 cursor-pointer">Settings</li>
+          {isAdmin && (
+            <li 
+              className="py-2 px-4 hover:bg-slate-500 cursor-pointer"
+              onClick={() => navigate('/admin/organizations')}
+            >
+              Manage Organizations
+            </li>
+          )}
           <li 
             className="py-2 px-4 hover:bg-slate-500 cursor-pointer"
             onClick={handleLogout}
