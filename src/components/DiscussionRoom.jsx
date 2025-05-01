@@ -1,47 +1,215 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, User, Circle } from 'lucide-react';
+import { apiClient } from '../apiConfig/ApiClient';
+import { useAuth } from '../security/AuthContext';
+import { formatDistanceToNow } from 'date-fns';
+// We're now using the global SockJS and Stomp directly from the CDN
+// import SockJS from 'sockjs-client';
+// import { Client } from '@stomp/stompjs';
 
-const GroupChat = () => {
-  const [messages, setMessages] = useState([
-    { id: 1, text: "Hey everyone! 👋", sender: "Alice", timestamp: "10:00 AM" },
-    { id: 2, text: "Hi Alice! How are you?", sender: "Bob", timestamp: "10:01 AM" },
-    { id: 3, text: "I'm doing great! What's new?", sender: "Alice", timestamp: "10:02 AM" },
-    { id: 4, text: "How are you?", sender: "You", timestamp: "12:01" }
-  ]);
-
-  const [users] = useState([
-    { id: 1, name: "Alice", status: "online", lastSeen: "now" },
-    { id: 2, name: "Bob", status: "online", lastSeen: "now" },
-    { id: 3, name: "Charlie", status: "offline", lastSeen: "5m ago" },
-    { id: 4, name: "David", status: "online", lastSeen: "now" },
-    { id: 5, name: "Eve", status: "offline", lastSeen: "23m ago" },
-    { id: 6, name: "Frank", status: "offline", lastSeen: "1h ago" }
-  ]);
-
+const DiscussionRoom = () => {
+  const [messages, setMessages] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [onlineCount, setOnlineCount] = useState(0);
   const [newMessage, setNewMessage] = useState("");
+  const [error, setError] = useState("");
+  const [connected, setConnected] = useState(false);
   const messagesEndRef = useRef(null);
+  const stompClient = useRef(null);
+  const { username, userId } = useAuth();
 
-  const onlineUsers = users.filter(user => user.status === "online");
-  const offlineUsers = users.filter(user => user.status === "offline");
+  const user = {
+    id: userId,
+    name: username.split("@")[0]
+  }
+
+  // Normal REST API call to get messages
+  const loadMessages = async () => {
+    try {
+      const response = await apiClient.get('/api/discussion/messages');
+      setMessages(response.data);
+      setError("");
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+      setError("Failed to load messages. Please try again later.");
+    }
+  };
+
+  // REST API call to get users
+  const loadUsers = async () => {
+    try {
+      const response = await apiClient.get('/api/discussion/users');
+      setOnlineCount(response.data.onlineCount);
+      // In a real app, you would get the list of users from the API
+      setUsers([
+        { id: 1, name: user?.name || "You", status: "online", lastSeen: "now" },
+        { id: 2, name: "Alice", status: "online", lastSeen: "now" },
+        { id: 3, name: "Bob", status: "offline", lastSeen: "5m ago" },
+        { id: 4, name: "Charlie", status: "offline", lastSeen: "23m ago" }
+      ]);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      setError("Failed to load user data. Please try again later.");
+    }
+  };
+
+  // Connect to WebSocket
+  const connectWebSocket = () => {
+    // Get authentication token
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.error('No authentication token found');
+      setError('No authentication token found. Please log in again.');
+      return false;
+    }
+
+    try {
+      // Make sure SockJS is available globally
+      if (!window.SockJS) {
+        console.error('SockJS not loaded');
+        setError('SockJS library not loaded. Using REST API fallback.');
+        return false;
+      }
+
+      // Create WebSocket connection
+      const socketUrl = `${apiClient.defaults.baseURL}/ws`;
+      console.log('Connecting to WebSocket at:', socketUrl);
+      
+      const socket = new window.SockJS(socketUrl);
+      const client = Stomp.over(socket);
+      
+      // Configure client
+      client.connectHeaders = {
+        'Authorization': `Bearer ${token}`
+      };
+      
+      // Debug
+      client.debug = (msg) => {
+        console.log('STOMP:', msg);
+      };
+
+      // Connect
+      client.connect(
+        { 'Authorization': `Bearer ${token}` },
+        () => {
+          // Success callback
+          console.log('Connected to WebSocket');
+          setConnected(true);
+          setError('');
+          
+          // Subscribe to topic
+          client.subscribe('/topic/public', (message) => {
+            try {
+              const receivedMessage = JSON.parse(message.body);
+              console.log('Received message:', receivedMessage);
+              
+              setMessages((prevMessages) => [
+                ...prevMessages, 
+                {
+                  id: receivedMessage.id || Math.random(),
+                  text: receivedMessage.text,
+                  sender: {
+                    id: receivedMessage.senderId,
+                    name: receivedMessage.senderName
+                  },
+                  timestamp: new Date().toISOString()
+                }
+              ]);
+            } catch (e) {
+              console.error('Error processing message:', e);
+            }
+          });
+        },
+        (error) => {
+          // Error callback
+          console.error('STOMP connection error:', error);
+          setConnected(false);
+          setError('Could not connect to chat server. Using REST API fallback.');
+          return false;
+        }
+      );
+      
+      stompClient.current = client;
+      return true;
+    } catch (error) {
+      console.error('Error connecting to WebSocket:', error);
+      setError('Error connecting to chat. Using REST API fallback.');
+      return false;
+    }
+  };
+
+  // Disconnect from WebSocket
+  const disconnectWebSocket = () => {
+    if (stompClient.current && stompClient.current.connected) {
+      stompClient.current.disconnect();
+      setConnected(false);
+    }
+  };
+
+  // On component mount
+  useEffect(() => {
+    // Load initial data
+    loadMessages();
+    loadUsers();
+    
+    // Try to connect to WebSocket
+    const connected = connectWebSocket();
+    
+    // If WebSocket fails, poll for new messages
+    let intervalId;
+    if (!connected) {
+      intervalId = setInterval(() => {
+        loadMessages();
+      }, 5000);
+    }
+    
+    // Clean up on unmount
+    return () => {
+      disconnectWebSocket();
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, []);
+
+  // Scroll to bottom when messages change
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  const handleSend = () => {
-    if (newMessage.trim()) {
-      const message = {
-        id: messages.length + 1,
-        text: newMessage,
-        sender: "You",
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      };
-      setMessages([...messages, message]);
-      setNewMessage("");
+  // Send a message
+  const handleSend = async () => {
+    if (!newMessage.trim()) return;
+    
+    try {
+      // Try WebSocket first
+      if (connected && stompClient.current && stompClient.current.connected) {
+        console.log('Sending message via WebSocket, user:', user);
+        // Make sure to include user details
+        const messageData = {
+          text: newMessage,
+          senderId: user?.id, // May be null or undefined
+          senderName: user?.name || "Anonymous"
+        };
+        console.log('Message data:', messageData);
+        
+        stompClient.current.send(
+          "/app/chat.sendMessage", 
+          {}, 
+          JSON.stringify(messageData)
+        );
+        setNewMessage("");
+      } else {
+        // Fall back to REST API
+        await apiClient.post('/api/discussion/messages', { text: newMessage });
+        setNewMessage("");
+        await loadMessages(); // Reload messages
+      }
+    } catch (error) {
+      console.error('Error sending message:', error);
+      setError('Failed to send message. Please try again.');
     }
   };
 
@@ -52,13 +220,25 @@ const GroupChat = () => {
     }
   };
 
+  const formatTimestamp = (timestamp) => {
+    if (!timestamp) return '';
+    try {
+      const date = new Date(timestamp);
+      return formatDistanceToNow(date, { addSuffix: true });
+    } catch (e) {
+      return timestamp;
+    }
+  };
+
+  const onlineUsers = users.filter(user => user.status === "online");
+
   return (
     <div className="flex h-[91vh] w-full mx-auto bg-[#2A2E35] shadow-xl">
       {/* User List Sidebar */}
       <div className="w-80 border-r border-gray-700 flex flex-col">
         {/* Online Users Section */}
         <div className="p-4 border-b border-gray-700">
-          <h3 className="text-white font-semibold mb-3">Online Users</h3>
+          <h3 className="text-white font-semibold mb-3">Online Users {connected && <span className="text-green-500 text-xs">(Connected)</span>}</h3>
           <div className="space-y-2">
             {onlineUsers.map(user => (
               <div key={user.id} className="flex items-center text-gray-300 hover:bg-gray-700 p-2 rounded">
@@ -95,36 +275,49 @@ const GroupChat = () => {
           </div>
           <div className="ml-3">
             <h2 className="text-xl font-semibold text-white">Group Chat</h2>
-            <p className="text-sm text-gray-400">{onlineUsers.length} online · {users.length} total</p>
+            <p className="text-sm text-gray-400">{onlineCount} online · {users.length} total</p>
           </div>
         </div>
 
+        {/* Error Message */}
+        {error && (
+          <div className="bg-red-500 text-white p-2 m-2 rounded">
+            {error}
+          </div>
+        )}
+
         {/* Messages Container */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className={`flex ${message.sender === "You" ? "justify-end" : "justify-start"}`}
-            >
-              <div className={`max-w-[70%] rounded-lg ${
-                message.sender === "You" 
-                  ? "bg-blue-500 text-white" 
-                  : "bg-white text-gray-900"
-              } p-3`}>
-                <div className="font-medium text-sm mb-1">
-                  {message.sender}
-                </div>
-                <div className="text-sm break-words">
-                  {message.text}
-                </div>
-                <div className={`text-xs mt-1 ${
-                  message.sender === "You" ? "text-blue-100" : "text-gray-500"
-                }`}>
-                  {message.timestamp}
+          {messages.length === 0 ? (
+            <div className="text-center text-gray-400 mt-10">
+              No messages yet. Start the conversation!
+            </div>
+          ) : (
+            messages.map((message) => (
+              <div
+                key={message.id}
+                className={`flex ${message.sender.id === user?.id ? "justify-end" : "justify-start"}`}
+              >
+                <div className={`max-w-[70%] rounded-lg ${
+                  message.sender.id === user?.id 
+                    ? "bg-blue-500 text-white" 
+                    : "bg-white text-gray-900"
+                } p-3`}>
+                  <div className="font-medium text-sm mb-1">
+                    {message.sender.name}
+                  </div>
+                  <div className="text-sm break-words">
+                    {message.text}
+                  </div>
+                  <div className={`text-xs mt-1 ${
+                    message.sender.id === user?.id ? "text-blue-100" : "text-gray-500"
+                  }`}>
+                    {formatTimestamp(message.timestamp)}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
           <div ref={messagesEndRef} />
         </div>
 
@@ -140,11 +333,6 @@ const GroupChat = () => {
                 placeholder="Type a message..."
                 className="w-full rounded-lg bg-gray-700 text-white placeholder-gray-400 p-3 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
-              <button className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300">
-                <svg viewBox="0 0 24 24" className="w-6 h-6">
-                  <path fill="currentColor" d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-                </svg>
-              </button>
             </div>
             <button
               onClick={handleSend}
@@ -159,4 +347,4 @@ const GroupChat = () => {
   );
 };
 
-export default GroupChat;
+export default DiscussionRoom;

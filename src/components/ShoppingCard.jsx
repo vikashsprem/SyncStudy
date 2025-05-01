@@ -66,11 +66,11 @@ const ShoppingCard = () => {
             <p className="text-gray-300">{`Genre: ${book.genre}`}</p>
             <p className="text-gray-300">{`Language: ${book.language}`}</p>
             <p className="text-gray-300">{`Rating: ${book.rating}`}</p>
-            <p className="text-gray-300">{`Price: ₹${book.price}`}</p>
-            <p className="text-gray-300">{`Discount: ${book.discount}%`}</p>
-            <p className="col-span-2 text-xl text-gray-200 font-bold">{`Total price: ₹${
+            {/* <p className="text-gray-300">{`Price: ₹${book.price}`}</p> */}
+            {/* <p className="text-gray-300">{`Discount: ${book.discount}%`}</p> */}
+            {/* <p className="col-span-2 text-xl text-gray-200 font-bold">{`Total price: ₹${
               book.price - (book.price * book.discount) / 100
-            }`}</p>
+            }`}</p> */}
           </div>
           <h2 className="text-2xl font-bold border-t-2 my-7"></h2>
         </div>

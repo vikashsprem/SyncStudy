@@ -13,7 +13,17 @@ export const retrieveBook = (id) => apiClient.get(`/api/books/${id}`);
 
 // Jwt Authentication
 export const executeJwtAuthenticationService = async (username, password) => {
-    const response = await apiClient.post(`/authenticate`, { username, password });
+    const response = await apiClient.post(`/authenticate`, { username, password }, {
+        headers: {
+            Authorization: null
+        }
+    });
+    if (response.status === 200) {
+        const { token, userId, roles } = response.data;
+        // Store token in localStorage
+        localStorage.setItem('token', token);
+        return { status: 200, data: { token, userId, roles } };
+    }
     return response;
 };
 
@@ -23,6 +33,10 @@ export const executeRegistrationService = (userData) =>
         password: userData.password,
         name: userData.name,
         organizationCode: userData.organizationCode
+    }, {
+        headers: {
+            Authorization: null
+        }
     });
 
 export const fetchOrganizations = () =>

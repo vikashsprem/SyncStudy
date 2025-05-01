@@ -21,8 +21,8 @@ const LoginComponent = () => {
     try {
       const response = await executeJwtAuthenticationService(username, password);
       if (response.status === 200) {
-        const { token, userId } = response.data;
-        await auth.handleLogin(token, username, userId);
+        const { token, userId, roles } = response.data;
+        await auth.handleLogin(token, username, userId, roles);
         setLoading(false);
         const mode = localStorage.getItem("mode");
         if(mode === "study") navigate("/books");

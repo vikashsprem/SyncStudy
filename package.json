@@ -20,8 +20,10 @@
     "@fortawesome/react-fontawesome": "^0.2.0",
     "@mui/icons-material": "^6.1.8",
     "@mui/material": "^6.1.6",
+    "@stomp/stompjs": "^7.0.0",
     "axios": "^1.6.5",
     "crypto-js": "^4.2.0",
+    "date-fns": "^2.30.0",
     "intersection-observer": "^0.12.2",
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.475.0",
@@ -33,7 +35,8 @@
     "react-responsive-carousel": "^3.2.23",
     "react-router-dom": "^6.21.2",
     "react-spring": "^9.7.3",
-    "react-transition-group": "^4.4.5"
+    "react-transition-group": "^4.4.5",
+    "sockjs-client": "^1.6.1"
   },
   "devDependencies": {
     "@types/react": "^18.2.43",

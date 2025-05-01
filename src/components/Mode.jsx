@@ -27,7 +27,7 @@ export default function ColorToggleButton({ mode , setMode }) {
         <Button color="primary" sx={{border:'1px solid #30373e', px:3}} onClick={() => navigate("/auth/login")}>
           Log In
         </Button>
-        <Button color="primary" sx={{border:'1px solid #30373e', px:3}} onClick={() => navigate("/users/register")}>
+        <Button color="primary" sx={{border:'1px solid #30373e', px:3}} onClick={() => navigate("/register")}>
           Sign up
         </Button>
       </div>

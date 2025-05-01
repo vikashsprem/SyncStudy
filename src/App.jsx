@@ -15,7 +15,7 @@ import UploadBook from "./components/UploadBook";
 import "./App.css";
 import HomePage from "./components/HomePage";
 import Layout from "./components/Layout";
-import GroupChat from "./components/DiscussionRoom";
+import DiscussionRoom from "./components/DiscussionRoom";
 import Marketplace from "./components/Marketplace";
 import MarketplaceItemDetail from "./components/MarketplaceItemDetail";
 import OrganizationManagement from "./components/OrganizationManagement";
@@ -28,7 +28,7 @@ function AuthenticatedRoute({ children }) {
 
 function AdminRoute({ children }) {
   const authContext = useAuth();
-  if (authContext.isAuthenticated && authContext.isAdmin) return children;
+  if (authContext.isAuthenticated && authContext.isSuperAdmin) return children;
   return <Navigate to='/auth/login' />;
 }
 
@@ -68,7 +68,7 @@ const App = () => {
               path='/chat'
               element={
                 <AuthenticatedRoute>
-                  <GroupChat />
+                  <DiscussionRoom />
                 </AuthenticatedRoute>
               }
             />

@@ -16,13 +16,9 @@ export default function AuthProvider({ children }) {
     setAuthenticated(true);
     setUsername(username);
     setToken(jwtToken);
+    localStorage.setItem('token', jwtToken);
     setUserId(userId);
     setUserRoles(roles || []);
-
-    apiClient.interceptors.request.use((config) => {
-      config.headers.Authorization = `Bearer ${jwtToken}`;
-      return config;
-    });
   }
 
   function handleLogout() {
@@ -35,6 +31,7 @@ export default function AuthProvider({ children }) {
   }
 
   const isAdmin = userRoles.includes('ROLE_ADMIN') || userRoles.includes('ROLE_SUPERADMIN');
+  const isSuperAdmin = userRoles.includes('ROLE_SUPERADMIN');
 
   return (
     <AuthContext.Provider
@@ -45,6 +42,7 @@ export default function AuthProvider({ children }) {
         userId,
         userRoles,
         isAdmin,
+        isSuperAdmin,
         handleLogin,
         handleLogout,
       }}
