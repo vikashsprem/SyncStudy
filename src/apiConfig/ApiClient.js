@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export const apiClient = axios.create({
-  baseURL: 'http://localhost:8081',
+  baseURL: 'https://app.vikashxsharma.com',
 });
 
 apiClient.interceptors.request.use(
