@@ -1,7 +1,10 @@
 import axios from "axios";
 
+
+const BASE_URL = import.meta.env.VITE_API_URL;
+
 export const apiClient = axios.create({
-  baseURL: 'https://app.vikashxsharma.com',
+  baseURL: BASE_URL,
 });
 
 apiClient.interceptors.request.use(
