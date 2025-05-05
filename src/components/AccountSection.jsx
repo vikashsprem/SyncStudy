@@ -5,7 +5,7 @@ import Avatar from "@mui/material/Avatar";
 import ProfileImage from "../assets/dummy-profile.png";
 
 const Profile = () => {
-  const { handleLogout, isSuperAdmin } = useAuth();
+  const { handleLogout, isSuperAdmin, username } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   console.log("isSuperAdmin", isSuperAdmin);
@@ -29,7 +29,7 @@ const Profile = () => {
         }`}
       >
         <ul>
-          <li className="py-2 px-4 hover:bg-slate-500 cursor-pointer">Profile</li>
+          <li className="py-2 px-4 hover:bg-slate-500 cursor-pointer">{username?.split('@')[0]?.slice(0, 14) || "Profile"}</li>
           <li className="py-2 px-4 hover:bg-slate-500 cursor-pointer">Settings</li>
           {isSuperAdmin && (
             <li 

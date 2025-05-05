@@ -4,15 +4,15 @@ import { Link } from "react-router-dom";
 // Updated images from Pexels (more relevant to each card)
 const cardImages = [
   "https://images.pexels.com/photos/590059/pexels-photo-590059.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2", // Cab Sharing
-  "https://images.pexels.com/photos/958545/pexels-photo-958545.jpeg?auto=compress&cs=tinysrgb&w=600", // Food Order Sharing
+  "https://images.pexels.com/photos/7108452/pexels-photo-7108452.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2", // Food Order Sharing
   "https://images.pexels.com/photos/230544/pexels-photo-230544.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2", // Marketplace
   "https://images.pexels.com/photos/3183150/pexels-photo-3183150.jpeg?auto=compress&cs=tinysrgb&w=600", // Join Discussion Room
 ];
 
 function CardSection() {
   const cards = [
-    { title: "Cab Sharing", action: "Continue", link: "#" },
-    { title: "Food Order Sharing", action: "Continue", link: "#" },
+    { title: "Cab Sharing", action: "Continue", link: "/cabshare" },
+    { title: "Project Collaboration", action: "Continue", link: "/project-collaboration" },
     { title: "Marketplace", action: "Continue", link: "/market-place" },
     { title: "Join Discussion Room", action: "Continue", link: "/chat" },
   ];

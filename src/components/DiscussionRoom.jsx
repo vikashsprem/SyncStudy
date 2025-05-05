@@ -103,18 +103,33 @@ const DiscussionRoom = () => {
               const receivedMessage = JSON.parse(message.body);
               console.log('Received message:', receivedMessage);
               
-              setMessages((prevMessages) => [
-                ...prevMessages, 
-                {
-                  id: receivedMessage.id || Math.random(),
+              // Only add message to state if we don't already have it
+              // We use the message.id to check this
+              setMessages((prevMessages) => {
+                // Check if message already exists in our state
+                const messageExists = prevMessages.some(msg => 
+                  msg.id === receivedMessage.id || 
+                  (msg.text === receivedMessage.text && 
+                   msg.sender.id === receivedMessage.senderId && 
+                   msg.sender.name === receivedMessage.senderName)
+                );
+                
+                if (messageExists) {
+                  // Message already exists, don't add it again
+                  return prevMessages;
+                }
+                
+                // Add the new message
+                return [...prevMessages, {
+                  id: receivedMessage.id || Math.random().toString(),
                   text: receivedMessage.text,
                   sender: {
                     id: receivedMessage.senderId,
                     name: receivedMessage.senderName
                   },
-                  timestamp: new Date().toISOString()
-                }
-              ]);
+                  timestamp: receivedMessage.timestamp || new Date().toISOString()
+                }];
+              });
             } catch (e) {
               console.error('Error processing message:', e);
             }
@@ -153,11 +168,11 @@ const DiscussionRoom = () => {
     loadUsers();
     
     // Try to connect to WebSocket
-    const connected = connectWebSocket();
+    const websocketConnected = connectWebSocket();
     
     // If WebSocket fails, poll for new messages
     let intervalId;
-    if (!connected) {
+    if (!websocketConnected) {
       intervalId = setInterval(() => {
         loadMessages();
       }, 5000);
@@ -187,25 +202,32 @@ const DiscussionRoom = () => {
       // Try WebSocket first
       if (connected && stompClient.current && stompClient.current.connected) {
         console.log('Sending message via WebSocket, user:', user);
-        // Make sure to include user details
+        
+        // We don't add the message to UI directly anymore
+        // We'll let the WebSocket subscription handle it
         const messageData = {
           text: newMessage,
-          senderId: user?.id, // May be null or undefined
-          senderName: user?.name || "Anonymous"
+          senderId: user.id,
+          senderName: user.name || "Anonymous"
         };
+        
         console.log('Message data:', messageData);
         
+        // Send message via WebSocket
         stompClient.current.send(
           "/app/chat.sendMessage", 
           {}, 
           JSON.stringify(messageData)
         );
+        
+        // Clear input
         setNewMessage("");
       } else {
         // Fall back to REST API
         await apiClient.post('/api/discussion/messages', { text: newMessage });
         setNewMessage("");
-        await loadMessages(); // Reload messages
+        // In REST API mode, we need to reload messages to see our new message
+        await loadMessages();
       }
     } catch (error) {
       console.error('Error sending message:', error);
@@ -296,10 +318,10 @@ const DiscussionRoom = () => {
             messages.map((message) => (
               <div
                 key={message.id}
-                className={`flex ${message.sender.id === user?.id ? "justify-end" : "justify-start"}`}
+                className={`flex ${message.sender.id === user.id ? "justify-end" : "justify-start"}`}
               >
                 <div className={`max-w-[70%] rounded-lg ${
-                  message.sender.id === user?.id 
+                  message.sender.id === user.id 
                     ? "bg-blue-500 text-white" 
                     : "bg-white text-gray-900"
                 } p-3`}>
@@ -310,7 +332,7 @@ const DiscussionRoom = () => {
                     {message.text}
                   </div>
                   <div className={`text-xs mt-1 ${
-                    message.sender.id === user?.id ? "text-blue-100" : "text-gray-500"
+                    message.sender.id === user.id ? "text-blue-100" : "text-gray-500"
                   }`}>
                     {formatTimestamp(message.timestamp)}
                   </div>

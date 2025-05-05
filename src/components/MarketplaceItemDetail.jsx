@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getItemDetails, showInterest } from '../apiConfig/MarketplaceService';
+import { getItemDetails, showInterest, getInterestedUsers, acceptInterest } from '../apiConfig/MarketplaceService';
 import { useAuth } from '../security/AuthContext';
 
 const MarketplaceItemDetail = () => {
@@ -10,10 +10,19 @@ const MarketplaceItemDetail = () => {
     const [item, setItem] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [interestedUsers, setInterestedUsers] = useState([]);
+    const [loadingUsers, setLoadingUsers] = useState(false);
 
     useEffect(() => {
         loadItemDetails();
     }, [itemId]);
+
+    useEffect(() => {
+        // If user is seller, load interested users
+        if (item && userId === item.seller?.id) {
+            loadInterestedUsers();
+        }
+    }, [item, userId]);
 
     const loadItemDetails = async () => {
         try {
@@ -28,6 +37,18 @@ const MarketplaceItemDetail = () => {
         }
     };
 
+    const loadInterestedUsers = async () => {
+        try {
+            setLoadingUsers(true);
+            const response = await getInterestedUsers(itemId);
+            setInterestedUsers(response.data || []);
+        } catch (err) {
+            console.error('Failed to load interested users:', err);
+        } finally {
+            setLoadingUsers(false);
+        }
+    };
+
     const handleShowInterest = async () => {
         try {
             setLoading(true);
@@ -38,6 +59,21 @@ const MarketplaceItemDetail = () => {
             console.error(err);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleAcceptInterest = async (buyerId) => {
+        try {
+            setLoadingUsers(true);
+            await acceptInterest(itemId, buyerId);
+            // Refresh both the item details and interested users
+            await loadItemDetails();
+            await loadInterestedUsers();
+        } catch (err) {
+            setError('Failed to accept interest');
+            console.error(err);
+        } finally {
+            setLoadingUsers(false);
         }
     };
 
@@ -188,13 +224,58 @@ const MarketplaceItemDetail = () => {
                                                         : 'Show Interest'}
                                         </button>
                                     ) : (
-                                        <div className="bg-gray-100 dark:bg-gray-700 rounded-lg p-4 text-center">
-                                            <p className="text-gray-600 dark:text-gray-300">
-                                                This is your listing
-                                            </p>
-                                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                                {item.interestedUsers?.length || 0} interested users
-                                            </p>
+                                        <div className="space-y-4">
+                                            <div className="bg-gray-100 dark:bg-gray-700 rounded-lg p-4">
+                                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                                                    Your Listing
+                                                </h3>
+                                                <p className="text-gray-600 dark:text-gray-300">
+                                                    {interestedUsers.length} interested {interestedUsers.length === 1 ? 'user' : 'users'}
+                                                </p>
+                                            </div>
+                                            
+                                            {/* Interested Users List */}
+                                            {interestedUsers.length > 0 && (
+                                                <div className="mt-6">
+                                                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                                                        Interested Users
+                                                    </h3>
+                                                    <div className="space-y-3 max-h-96 overflow-y-auto">
+                                                        {loadingUsers ? (
+                                                            <div className="flex justify-center py-4">
+                                                                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                                                            </div>
+                                                        ) : (
+                                                            interestedUsers.map(user => (
+                                                                <div 
+                                                                    key={user.id}
+                                                                    className="flex justify-between items-center p-3 bg-white dark:bg-gray-700 rounded-lg shadow"
+                                                                >
+                                                                    <div>
+                                                                        <h4 className="font-medium text-gray-900 dark:text-white">
+                                                                            {user.name}
+                                                                        </h4>
+                                                                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                                                                            {user.email}
+                                                                        </p>
+                                                                    </div>
+                                                                    <button
+                                                                        onClick={() => handleAcceptInterest(user.id)}
+                                                                        disabled={!item.available || loadingUsers}
+                                                                        className={`px-4 py-2 rounded-md text-white font-medium ${
+                                                                            !item.available || loadingUsers
+                                                                                ? 'bg-gray-400 cursor-not-allowed'
+                                                                                : 'bg-green-600 hover:bg-green-700'
+                                                                        }`}
+                                                                    >
+                                                                        {loadingUsers ? 'Processing...' : 'Accept'}
+                                                                    </button>
+                                                                </div>
+                                                            ))
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
                                     )}
                                 </div>

@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { showInterest, acceptInterest, getInterestedUsers } from '../apiConfig/MarketplaceService';
+import { showInterest } from '../apiConfig/MarketplaceService';
 import { useAuth } from '../security/AuthContext';
 
 const MarketplaceItem = ({ item, onRefresh }) => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
-    const [showInterested, setShowInterested] = useState(false);
-    const [interestedUsers, setInterestedUsers] = useState([]);
     const { userId } = useAuth();
 
     const handleShowInterest = async (e) => {
@@ -23,32 +21,9 @@ const MarketplaceItem = ({ item, onRefresh }) => {
         }
     };
 
-    const handleAcceptInterest = async (e, buyerId) => {
-        e.stopPropagation(); // Prevent navigation when clicking the button
-        try {
-            setLoading(true);
-            await acceptInterest(item.id, buyerId);
-            if (onRefresh) onRefresh();
-            setShowInterested(false); // Close the interested users view after accepting
-        } catch (error) {
-            console.error('Failed to accept interest:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const loadInterestedUsers = async (e) => {
-        e.stopPropagation(); // Prevent navigation when clicking the button
-        try {
-            setLoading(true);
-            const response = await getInterestedUsers(item.id);
-            setInterestedUsers(response.data || []);
-            setShowInterested(true);
-        } catch (error) {
-            console.error('Failed to load interested users:', error);
-        } finally {
-            setLoading(false);
-        }
+    const navigateToItemDetails = (e) => {
+        e.stopPropagation();
+        navigate(`/market-place/${item.id}`);
     };
 
     return (
@@ -96,53 +71,13 @@ const MarketplaceItem = ({ item, onRefresh }) => {
                 {/* Action Buttons */}
                 <div className="space-y-2" onClick={e => e.stopPropagation()}>
                     {userId && item.seller && userId === item.seller.id ? (
-                        // Seller View
-                        <div className="space-y-3">
-                            <button
-                                onClick={loadInterestedUsers}
-                                className={`w-full px-4 py-2 rounded-md text-white font-semibold transition-colors ${
-                                    loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
-                                }`}
-                                disabled={loading}
-                            >
-                                {loading ? 'Loading...' : `View Interested Users (${item.interestedUsers?.length || 0})`}
-                            </button>
-
-                            {showInterested && (
-                                <div className="mt-4 space-y-2 bg-gray-50 dark:bg-gray-700 rounded-md p-3">
-                                    {interestedUsers.length > 0 ? (
-                                        interestedUsers.map(user => (
-                                            <div
-                                                key={user.id}
-                                                className="flex justify-between items-center p-2 bg-white dark:bg-gray-600 rounded-md shadow-sm"
-                                            >
-                                                <div className="flex flex-col">
-                                                    <span className="font-medium">{user.name}</span>
-                                                    <span className="text-sm text-gray-500 dark:text-gray-400">
-                                                        {user.email}
-                                                    </span>
-                                                </div>
-                                                <button
-                                                    onClick={(e) => handleAcceptInterest(e, user.id)}
-                                                    className={`px-3 py-1 rounded-md text-white ${
-                                                        loading 
-                                                            ? 'bg-gray-400 cursor-not-allowed' 
-                                                            : 'bg-green-600 hover:bg-green-700'
-                                                    }`}
-                                                    disabled={loading}
-                                                >
-                                                    {loading ? '...' : 'Accept'}
-                                                </button>
-                                            </div>
-                                        ))
-                                    ) : (
-                                        <p className="text-center text-gray-500 dark:text-gray-400 py-2">
-                                            No interested users yet
-                                        </p>
-                                    )}
-                                </div>
-                            )}
-                        </div>
+                        // Seller View - Show count and navigate to details
+                        <button
+                            onClick={navigateToItemDetails}
+                            className="w-full px-4 py-2 rounded-md text-white font-semibold transition-colors bg-blue-600 hover:bg-blue-700"
+                        >
+                            View Interested Users ({item.interestedUsers?.length || 0})
+                        </button>
                     ) : (
                         // Buyer View
                         <button
