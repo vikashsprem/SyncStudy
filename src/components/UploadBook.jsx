@@ -80,26 +80,6 @@ const BookInput = () => {
 
   return (
     <div className="min-h-screen p-6">
-      {/* Preview Panel */}
-      <div className="fixed bottom-5 right-5 bg-[#2a2e32] p-4 rounded-lg shadow-lg max-w-xs">
-        <h3 className="text-white text-sm font-semibold mb-3">Preview</h3>
-        {previewUrl && (
-          <img
-            src={previewUrl}
-            alt="Book Cover Preview"
-            className="w-32 h-40 object-cover rounded-md mx-auto mb-3"
-          />
-        )}
-        {Object.entries(book).map(([key, value]) =>
-          value ? (
-            <div key={key} className="bg-[#373b40] rounded-md p-2 mb-2">
-              <span className="text-gray-400 capitalize text-xs">{key}: </span>
-              <span className="text-white text-xs">{value.toString().slice(0, 20)}</span>
-            </div>
-          ) : null
-        )}
-      </div>
-
       {/* Main Form */}
       <div className="max-w-6xl mx-auto">
         <h1 className="text-3xl font-bold text-white mb-8">Book Details</h1>
