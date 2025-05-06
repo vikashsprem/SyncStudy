@@ -48,6 +48,21 @@
     animation: slideFadeIn 0.5s ease-in-out;
 }
 
+@keyframes slideFade {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-slide-fade {
+    animation: slideFade 0.5s ease-out forwards;
+}
+
 ::placeholder {
     color: #999;
     font-size: 15px;
@@ -74,4 +89,22 @@
 
 .container::-webkit-scrollbar {
     display: none;
+}
+
+/* Add responsive container styles */
+.responsive-container {
+    width: 100%;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+/* Book card hover effect */
+.book-card-hover {
+    transition: all 0.3s ease;
+}
+
+.book-card-hover:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
 }

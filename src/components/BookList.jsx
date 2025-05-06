@@ -128,24 +128,34 @@ function BookList() {
     <>
       <PromoCard />
       {/* Filter Section */}
-      <div className="p-6 bg-gray-100 dark:bg-gray-800 rounded-lg shadow-md mb-6">
-        <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
-          Filters
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {renderFilterField("Name", "name", "Filter by name", filters.name, suggestions.name)}
-          {renderFilterField("Genre", "genre", "Filter by genre", filters.genre, suggestions.genre)}
-          {renderFilterField("Author", "author", "Filter by author", filters.author, suggestions.author)}
+      <div className="container mx-auto px-4 mb-6">
+        <div className="p-6 bg-gray-100 dark:bg-gray-800 rounded-lg shadow-md">
+          <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
+            Filters
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {renderFilterField("Name", "name", "Filter by name", filters.name, suggestions.name)}
+            {renderFilterField("Genre", "genre", "Filter by genre", filters.genre, suggestions.genre)}
+            {renderFilterField("Author", "author", "Filter by author", filters.author, suggestions.author)}
+          </div>
         </div>
       </div>
       {/* Book List */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 p-6 animate-slide-fade">
-        {Array.isArray(filteredBooks) &&
-          filteredBooks.map((book) => (
-            <Link key={book.id} to={`/books/${book.id}`} className="block">
-              <BookCard key={book.id} book={book} />
-            </Link>
-          ))}
+      <div className="container mx-auto px-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 justify-items-center animate-slide-fade">
+          {Array.isArray(filteredBooks) && filteredBooks.length > 0 ? (
+            filteredBooks.map((book) => (
+              <Link key={book.id} to={`/books/${book.id}`} className="w-full max-w-[260px]">
+                <BookCard key={book.id} book={book} />
+              </Link>
+            ))
+          ) : (
+            <div className="col-span-full text-center py-10">
+              <h3 className="text-xl text-gray-300 mb-2">No books found</h3>
+              <p className="text-gray-400">Try adjusting your search filters or upload a new book.</p>
+            </div>
+          )}
+        </div>
       </div>
       {/* Upload Button */}
       <button
