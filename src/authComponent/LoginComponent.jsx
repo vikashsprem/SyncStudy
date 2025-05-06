@@ -60,7 +60,7 @@ const LoginComponent = () => {
         id="form"
       >
         <div className="text-center">
-          <p id="account-paragraph">Log in to SyncStudy</p>
+          <p id="account-paragraph">Log in to SyncShare</p>
         </div>
         <div className="relative flex justify-center">
           <div className="absolute bg-red-600 px-3">
