@@ -32,7 +32,8 @@ export const executeRegistrationService = (userData) =>
         email: userData.email,
         password: userData.password,
         name: userData.name,
-        organizationCode: userData.organizationCode
+        organizationCode: userData.organizationCode,
+        whatsappNumber: userData.whatsappNumber
     }, {
         headers: {
             Authorization: null

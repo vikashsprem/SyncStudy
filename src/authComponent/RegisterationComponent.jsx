@@ -10,7 +10,8 @@ const RegisterationComponent = () => {
     email: "",
     password: "",
     name: "",
-    organizationCode: ""
+    organizationCode: "",
+    whatsappNumber: ""
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -125,6 +126,17 @@ const RegisterationComponent = () => {
               name="password"
               required
               value={formData.password}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div className="m-2 flex justify-center">
+            <input
+              placeholder="WhatsApp number (optional)"
+              type="tel"
+              className="input-box p-1 w-2/3 px-3 py-2 border-gray-400 border rounded-sm"
+              name="whatsappNumber"
+              value={formData.whatsappNumber}
               onChange={handleChange}
             />
           </div>
