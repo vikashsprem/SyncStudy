@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, User, Circle } from 'lucide-react';
+import { Send, User, Circle, Menu, X } from 'lucide-react';
 import { apiClient } from '../apiConfig/ApiClient';
 import { useAuth } from '../security/AuthContext';
 import { formatDistanceToNow } from 'date-fns';
@@ -14,6 +14,7 @@ const DiscussionRoom = () => {
   const [newMessage, setNewMessage] = useState("");
   const [error, setError] = useState("");
   const [connected, setConnected] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(false);
   const messagesEndRef = useRef(null);
   const stompClient = useRef(null);
   const { username, userId } = useAuth();
@@ -254,13 +255,25 @@ const DiscussionRoom = () => {
 
   const onlineUsers = users.filter(user => user.status === "online");
 
+  const toggleSidebar = () => {
+    setShowSidebar(!showSidebar);
+  };
+
   return (
-    <div className="flex h-[91vh] w-full mx-auto bg-[#2A2E35] shadow-xl">
-      {/* User List Sidebar */}
-      <div className="w-80 border-r border-gray-700 flex flex-col">
+    <div className="flex h-[91vh] w-full mx-auto bg-[#2A2E35] shadow-xl relative">
+      {/* Mobile Menu Button */}
+      <button 
+        className="md:hidden absolute top-0 left-4 z-30 text-white p-2 rounded-full  h-16 flex items-center justify-center"
+        onClick={toggleSidebar}
+      >
+        {showSidebar ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+      </button>
+
+      {/* User List Sidebar - Hidden on mobile unless toggled */}
+      <div className={`${showSidebar ? 'flex' : 'hidden'} md:flex md:w-80 w-full md:static absolute z-10 h-full md:h-auto bg-[#2A2E35] border-r border-gray-700 flex-col`}>
         {/* Online Users Section */}
         <div className="p-4 border-b border-gray-700">
-          <h3 className="text-white font-semibold mb-3">Online Users {connected && <span className="text-green-500 text-xs">(Connected)</span>}</h3>
+          <h3 className="text-white font-semibold mb-3 pt-8 md:pt-0">Online Users {connected && <span className="text-green-500 text-xs">(Connected)</span>}</h3>
           <div className="space-y-2">
             {onlineUsers.map(user => (
               <div key={user.id} className="flex items-center text-gray-300 hover:bg-gray-700 p-2 rounded">
@@ -289,15 +302,19 @@ const DiscussionRoom = () => {
       </div>
 
       {/* Chat Area */}
-      <div className="flex-1 flex flex-col px-5">
+      <div className="flex-1 flex flex-col px-2 md:px-5">
         {/* Chat Header */}
-        <div className="flex items-center p-4 border-b border-gray-700">
-          <div className="bg-gray-600 rounded-full p-2">
-            <User className="w-6 h-6 text-gray-300" />
-          </div>
-          <div className="ml-3">
-            <h2 className="text-xl font-semibold text-white">Group Chat</h2>
-            <p className="text-sm text-gray-400">{onlineCount} online · {users.length} total</p>
+        <div className="flex items-center justify-center md:justify-start h-16 border-b border-gray-700">
+          <div className="w-full flex items-center justify-center md:justify-start px-4">
+            <div className="flex items-center">
+              <div className="bg-gray-600 rounded-full p-2">
+                <User className="w-5 h-5 text-gray-300" />
+              </div>
+              <div className="ml-3">
+                <h2 className="text-xl font-semibold text-white">Group Chat</h2>
+                <p className="text-sm text-gray-400">{onlineCount} online · {users.length} total</p>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -309,7 +326,7 @@ const DiscussionRoom = () => {
         )}
 
         {/* Messages Container */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div className="flex-1 overflow-y-auto p-2 md:p-4 space-y-4">
           {messages.length === 0 ? (
             <div className="text-center text-gray-400 mt-10">
               No messages yet. Start the conversation!
@@ -318,13 +335,13 @@ const DiscussionRoom = () => {
             messages.map((message) => (
               <div
                 key={message.id}
-                className={`flex ${message.sender.id === user.id ? "justify-end" : "justify-start"}`}
+                className={`flex ${message.sender.id === user.id ? "justify-end" : "justify-start"} w-full`}
               >
-                <div className={`max-w-[70%] rounded-lg ${
+                <div className={`max-w-[85%] md:max-w-[70%] rounded-lg ${
                   message.sender.id === user.id 
                     ? "bg-blue-500 text-white" 
                     : "bg-white text-gray-900"
-                } p-3`}>
+                } p-3 break-words`}>
                   <div className="font-medium text-sm mb-1">
                     {message.sender.name}
                   </div>
@@ -344,7 +361,7 @@ const DiscussionRoom = () => {
         </div>
 
         {/* Input Area */}
-        <div className="border-t border-gray-700 p-4">
+        <div className="border-t border-gray-700 p-2 md:p-4">
           <div className="flex items-end space-x-2">
             <div className="flex-1 relative">
               <input
@@ -353,12 +370,12 @@ const DiscussionRoom = () => {
                 onChange={(e) => setNewMessage(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Type a message..."
-                className="w-full rounded-lg bg-gray-700 text-white placeholder-gray-400 p-3 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-lg bg-gray-700 text-white placeholder-gray-400 p-2 md:p-3 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <button
               onClick={handleSend}
-              className="bg-blue-500 text-white rounded-full p-3 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800"
+              className="bg-blue-500 text-white rounded-full p-2 md:p-3 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800"
             >
               <Send className="w-5 h-5" />
             </button>
