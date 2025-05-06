@@ -158,7 +158,7 @@ const LoginComponent = () => {
             className="font-semibold opacity-60"
           >
             Note: If you haven't registered yet.
-            <Link to="/users/create" className="text-white underline">
+            <Link to="/register" className="text-white underline">
               {" "}
               Register now
             </Link>
